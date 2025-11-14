@@ -1,0 +1,39 @@
+variable "aws_region" {
+  description = "Región de AWS para desplegar los recursos"
+  type        = string
+}
+
+variable "vpc_cidr" {
+  description = "Bloque CIDR para la VPC"
+  type        = string
+}
+
+variable "vpc_name" {
+  description = "Nombre para la VPC y prefijo para recursos dentro"
+  type        = string
+}
+
+variable "availability_zones" {
+  description = "Zonas de disponibilidad para las subredes"
+  type        = list(string)
+}
+
+variable "public_subnet_cidrs" {
+  description = "Bloques CIDR para subredes públicas (uno por AZ)"
+  type        = list(string)
+}
+
+variable "public_subnet_names" {
+  description = "Nombre para subredes públicas"
+  type        = list(string)
+}
+
+variable "private_subnet_cidrs" {
+  description = "Bloques CIDR para subredes privadas (uno por AZ)"
+  type        = list(string)
+}
+
+variable "private_subnet_names" {
+  description = "Nombre para subredes privadas"
+  type        = list(string)
+}
