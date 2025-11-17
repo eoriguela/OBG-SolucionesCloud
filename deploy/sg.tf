@@ -3,11 +3,13 @@
 #############################################
 
 #Load Balancer Security Group
+
 resource "aws_security_group" "sg_lb" {
-  name        = "lb_sg"
-  description = "Security Group del Load Balancer"
+  name        = "${var.vpc_name}-lb-sg"
+  description = "Security Group del Load Balancer publico"
   vpc_id      = aws_vpc.main.id
 
+  # HTTP publico
   ingress {
     description = "HTTP publico"
     from_port   = 80
@@ -16,6 +18,7 @@ resource "aws_security_group" "sg_lb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # HTTPS publico (para conexiones SSL)
   ingress {
     description = "HTTPS publico"
     from_port   = 443
@@ -25,78 +28,137 @@ resource "aws_security_group" "sg_lb" {
   }
 
   # Salida hacia App Servers
-   egress {
+  egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Name = "${var.vpc_name}-lb-sg"
+  }
 }
 
 
+
 #App Server Security Group
+
 resource "aws_security_group" "sg_app" {
-  name        = "app_sg"    #Redefinir
-  description = "Security Group para los servidores de aplicacion"
+  name        = "${var.vpc_name}-app-sg"
+  description = "Security Group de servidores de aplicacion"
   vpc_id      = aws_vpc.main.id
 
+  # Trafico HTTP desde el ALB
   # Los App Servers solo aceptan tráfico del LB
   ingress {
-    description     = "Trafico desde ALB"
+    description     = "Trafico HTTP desde ALB"
     from_port       = 8080
     to_port         = 8080
     protocol        = "tcp"
     security_groups = [aws_security_group.sg_lb.id]
   }
 
-  # Salida hacia DB y Backup
+  # SSH permitido desde cualquier IP o rango autorizado
+  ingress {
+    description = "SSH administrativo"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] #Se permiten conexiones desde cualquier lugar con fines de laboratorio
+  }
+
+  # Salida a todas las subredes privadas (DB y Backups)
   egress {
-    from_port       = 0     
-    to_port         = 0   # Puerto a editar previa designación db,posiblemente PostgreSQL (5432)
-    protocol        = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    description = "Salida hacia toda la VPC"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [aws_vpc.main.cidr_block]
   }
 
   tags = {
-    Name = "app_sg" # Redefinir
+    Name = "${var.vpc_name}-app-sg"
   }
 }
 
 # DB Security Group
+# SG de Base de datos (MySql RDS MULTI-AZ)
+#############################################
+
 resource "aws_security_group" "sg_db" {
-  name        = "db_sg" #Redefinir
-  description = "Security Group para Base de Datos"
+  name        = "${var.vpc_name}-db-sg"
+  description = "Security Group de RDS MySQL"
   vpc_id      = aws_vpc.main.id
 
+  # MySQL permitido desde servidores de aplicación
   ingress {
-    description     = "acceso DB desde de aplicacion"
-    from_port       = 5432
-    to_port         = 5432     # Puerto PostgreSQL 
+    description     = "MySQL desde instancias de aplicacion"
+    from_port       = 3306
+    to_port         = 3306
     protocol        = "tcp"
     security_groups = [aws_security_group.sg_app.id]
   }
 
-  # La DB envíaría tráfico solo si lo necesita (backups)
+  # Permitir trafico del servidor de backups
+  ingress {
+    description     = "MySQL desde servidor de Backups"
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_security_group.sg_backup.id]
+  }
+
+  # Salida general (normal en RDS)
   egress {
-    from_port       = 0
-    to_port         = 0 
-    protocol        = "-1"
-     cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
-    Name = "db_sg"  # Redefinir
+    Name = "${var.vpc_name}-db-sg"
   }
 }
 
 
+
 # Backup Server Security Group
 resource "aws_security_group" "sg_backup" {
-  name        = "backup_sg"
-  description = "Security Group para Servidor de Backups"
+  name        = "${var.vpc_name}-backup-sg"
+  description = "Security Group para servidor de backups"
   vpc_id      = aws_vpc.main.id
 
-  ## Restan realizar reglas ingress y de salida hacia db y app srvers
+  # Permitir conexiones desde App Servers (para subir backups)
+  ingress {
+    description     = "Backups desde App Servers"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Permitir salida hacia RDS
+  egress {
+    description = "Salida hacia RDS"
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Salida general (si se requiere para servicios S3 o LB)
+  egress {
+    description = "Salida general"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name = "${var.vpc_name}-backup-sg"
+  }
 }
 
   
