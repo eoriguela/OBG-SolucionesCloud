@@ -56,3 +56,34 @@ variable "key_name" {
   default     = "vockey"
 }
 
+# RDS
+variable "db_name" {
+  description = "Nombre de la base de datos"
+  type        = string
+}
+
+variable "db_username" {
+  description = "Usuario administrador de la base de datos"
+  type        = string
+}
+
+variable "db_password" {
+  description = "Password del usuario de la base de datos"
+  type        = string
+  sensitive   = true
+}
+
+variable "db_instance_class" {
+  description = "Clase de instancia RDS (ej: db.t3.micro)"
+  type        = string
+}
+
+variable "db_allocated_storage" {
+  description = "Almacenamiento en GB para RDS"
+  type        = number
+}
+
+variable "db_backup_retention_days" {
+  description = "Días de retención de backups automáticos"
+  type        = number
+}
