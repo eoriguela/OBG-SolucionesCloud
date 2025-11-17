@@ -6,3 +6,6 @@ public_subnet_cidrs  = ["10.0.0.0/24", "10.0.1.0/24"]
 public_subnet_names  = ["public-subnet-1", "public-subnet-2"]
 private_subnet_cidrs = ["10.0.2.0/24", "10.0.3.0/24"]
 private_subnet_names = ["private-subnet-3", "private-subnet-4"]
+app_ami              = "ami-03c870feb7c37e4ff"
+instance_type        = "t2.micro"
+key_name             = "vockey"
