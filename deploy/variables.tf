@@ -41,19 +41,16 @@ variable "private_subnet_names" {
 variable "instance_type" {
   description = "tipo de instancia EC2 para instancias de aplicación"
   type        = string
-  default     = "t3.micro"
 }
 
 variable "app_ami" {
   description = "AMI ID para instancias de aplicación"
   type        = string
-  default     = "ami-03c870feb7c37e4ff"
 }
 
 variable "key_name" {
   description = "Nombre del KeyPair a usar para las instancias"
   type        = string
-  default     = "vockey"
 }
 
 # RDS
