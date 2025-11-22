@@ -84,3 +84,23 @@ variable "db_backup_retention_days" {
   description = "Días de retención de backups automáticos"
   type        = number
 }
+
+variable "dump_bucket_name" {
+  description = "Nombre del bucket S3 donde se sube el dump.sql"
+  type        = string
+}
+
+variable "bastion_ami" {
+  description = "AMI para el bastion (Amazon Linux 2)"
+  type        = string
+}
+
+variable "bastion_instance_type" {
+  description = "Tipo de instancia para el bastion"
+  type        = string
+}
+
+variable "s3_bucket_name" {
+  description = "Nombre del bucket donde está dump.sql"
+  type        = string
+}

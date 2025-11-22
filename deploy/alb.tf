@@ -2,14 +2,14 @@
 
 resource "aws_lb_target_group" "tg_app" {
   name        = "${var.vpc_name}-app-tg"
-  port        = 8080
+  port        = 80
   protocol    = "HTTP"
   target_type = "instance"
   vpc_id      = aws_vpc.main.id
 
   health_check {
     path                = "/"
-    port                = "8080"
+    port                = "80"
     protocol            = "HTTP"
     unhealthy_threshold = 3
     healthy_threshold   = 3

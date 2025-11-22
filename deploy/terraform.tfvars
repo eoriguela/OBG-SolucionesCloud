@@ -10,6 +10,15 @@ app_ami              = "ami-03c870feb7c37e4ff"
 instance_type        = "t2.micro"
 key_name             = "vockey"
 
+dump_bucket_name = "obligatorio-ecommerce-dump-2025"
+
+bastion_ami           = "ami-0c02fb55956c7d316" # Amazon Linux 2 en us-east-1
+bastion_instance_type = "t2.micro"
+
+s3_bucket_name = "obligatorio-dump-bucket"
+
+
+
 # Variables DB
 db_name                  = "ecommerce"
 db_username              = "ecommerce_user"

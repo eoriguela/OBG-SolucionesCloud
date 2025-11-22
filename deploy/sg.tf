@@ -53,8 +53,8 @@ resource "aws_security_group" "sg_app" {
   # Los App Servers solo aceptan tráfico del LB
   ingress {
     description     = "Trafico HTTP desde ALB"
-    from_port       = 8080
-    to_port         = 8080
+    from_port       = 80
+    to_port         = 80
     protocol        = "tcp"
     security_groups = [aws_security_group.sg_lb.id]
   }
@@ -109,6 +109,15 @@ resource "aws_security_group" "sg_db" {
     security_groups = [aws_security_group.sg_backup.id]
   }
 
+  # MySQL desde Bastion
+  ingress {
+    description     = "MySQL desde Bastion"
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_security_group.sg_bastion.id]
+  }
+
   # Salida general (normal en RDS)
   egress {
     from_port   = 0
@@ -121,8 +130,6 @@ resource "aws_security_group" "sg_db" {
     Name = "${var.vpc_name}-db-sg"
   }
 }
-
-
 
 # Backup Server Security Group
 resource "aws_security_group" "sg_backup" {
@@ -161,4 +168,30 @@ resource "aws_security_group" "sg_backup" {
   }
 }
 
-  
+# Bastion Security Group
+resource "aws_security_group" "sg_bastion" {
+  name        = "${var.vpc_name}-bastion-sg"
+  description = "Security Group para bastion host"
+  vpc_id      = aws_vpc.main.id
+
+  # SSH desde Internet (solo laboratorio)
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # salida hacia toda la VPC (para hablar con RDS)
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [aws_vpc.main.cidr_block]
+  }
+
+  tags = {
+    Name = "${var.vpc_name}-bastion-sg"
+  }
+}
