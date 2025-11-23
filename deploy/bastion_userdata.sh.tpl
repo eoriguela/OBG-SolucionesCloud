@@ -1,10 +1,10 @@
 #!/bin/bash
 
 yum update -y
-yum install -y mysql wget
+yum install -y mysql awscli
 
-# Descargar dump.sql desde S3 público
-wget https://${s3_bucket}.s3.amazonaws.com/dump.sql -O /tmp/dump.sql
+# Descargar dump.sql desde S3 usando IAM Role
+aws s3 cp s3://${s3_bucket}/dump.sql /tmp/dump.sql
 
 # Esperar a que el RDS esté accesible
 for i in {1..30}; do

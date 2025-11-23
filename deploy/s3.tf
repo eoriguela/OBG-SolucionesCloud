@@ -12,7 +12,6 @@ resource "aws_s3_object" "dump_sql" {
   key    = "dump.sql"
 
   # Ruta relativa desde el módulo "deploy"
-  source = "/root/OBG-SolucionesCloud/app/e-commerce-obligatorio-2025/dump.sql"
+  source = "/home/sysadmin/OBG-SolucionesCloud/app/php-ecommerce-obligatorio-2025/dump.sql"
 
-  etag = filemd5("/root/OBG-SolucionesCloud/app/e-commerce-obligatorio-2025/dump.sql")
 }

@@ -11,11 +11,12 @@ data "template_file" "bastion_userdata" {
 }
 
 resource "aws_instance" "bastion" {
-  ami           = var.app_ami
-  instance_type = "t2.micro"
+  ami           = var.bastion_ami
+  instance_type = var.bastion_instance_type
   subnet_id     = aws_subnet.public[0].id
   key_name      = var.key_name
   vpc_security_group_ids = [aws_security_group.sg_bastion.id]
+  iam_instance_profile = "LabInstanceProfile"
 
   user_data = data.template_file.bastion_userdata.rendered
 

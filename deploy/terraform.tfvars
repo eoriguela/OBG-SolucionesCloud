@@ -6,14 +6,14 @@ public_subnet_cidrs  = ["10.0.0.0/24", "10.0.1.0/24"]
 public_subnet_names  = ["public-subnet-1", "public-subnet-2"]
 private_subnet_cidrs = ["10.0.2.0/24", "10.0.3.0/24"]
 private_subnet_names = ["private-subnet-3", "private-subnet-4"]
-app_ami              = "ami-03c870feb7c37e4ff"
-instance_type        = "t2.micro"
+app_ami              = "ami-06dd5c911c0d8dcdc"
+instance_type        = "t3a.medium"
 key_name             = "vockey"
 
 dump_bucket_name = "obligatorio-ecommerce-dump-2025"
 
-bastion_ami           = "ami-0c02fb55956c7d316" # Amazon Linux 2 en us-east-1
-bastion_instance_type = "t2.micro"
+bastion_ami           = "ami-06dd5c911c0d8dcdc" # Amazon Linux 2 en us-east-1
+bastion_instance_type = "t3a.medium"
 
 s3_bucket_name = "obligatorio-dump-bucket"
 
