@@ -21,14 +21,14 @@ resource "aws_s3_object" "dump_sql" {
   key    = "dump.sql"
 
   # Ruta relativa desde el módulo "deploy"
-  source = "/root/OBG-SolucionesCloud/app/php-ecommerce-obligatorio-2025/dump.sql"
+  source = "/home/sysadmin/OBG-SolucionesCloud/app/php-ecommerce-obligatorio-2025/dump.sql"
 
 }
 
 # Zipea la App completa
 data "archive_file" "app_zip" {
   type        = "zip"
-  source_dir  = "/root/OBG-SolucionesCloud/app/php-ecommerce-obligatorio-2025"
+  source_dir  = "/home/sysadmin/OBG-SolucionesCloud/app/php-ecommerce-obligatorio-2025"
   output_path = "${path.module}/app.zip"
 }
 # Sube el zip al bucket
