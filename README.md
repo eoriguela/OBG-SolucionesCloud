@@ -31,13 +31,13 @@ La infraestructura se crea automáticamente mediante la utilizacion de Terraform
 4. S3
 
 * Bucket para almacenar el dump de la base de datos
-* Bucket para hostear los artefactos de la aplicación
+* Bucket para hostear el despliegue de la aplicación
 
 5. Auto Scaling Group
 
 * Launch Template con configuración de la instancia
-* Instalación automática de dependencias PHP y aplicación desde S3
-* Conexión automática a RDS
+* Instalación automática de apache, dependencias PHP y despliegue de la aplicación desde S3
+* Conexión automática a endpoint RDS con MySQL
 * Instalación del agente de CloudWatch para métricas básicas
 
 6. Balanceo de carga (ALB)
