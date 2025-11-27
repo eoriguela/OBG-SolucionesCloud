@@ -60,3 +60,48 @@ cat <<EOF > /var/www/html/config.php
     define('DB_DATABASE', '${db_name}');
 ?>
 EOF
+
+
+# Instalar CloudWatch Agent
+
+yum install -y amazon-cloudwatch-agent
+
+
+# Crear configuración del agente
+
+cat <<'EOF' > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+{
+  "metrics": {
+    "append_dimensions": {
+      "AutoScalingGroupName": "$${aws:AutoScalingGroupName}",
+      "InstanceId": "$${aws:InstanceId}"
+    },
+    "metrics_collected": {
+      "mem": {
+        "measurement": [ "mem_used_percent" ]
+      },
+      "cpu": {
+        "measurement": [
+          "cpu_usage_idle",
+          "cpu_usage_user",
+          "cpu_usage_system"
+        ],
+        "totalcpu": true
+      },
+      "disk": {
+        "measurement": [ "used_percent" ],
+        "resources": [ "*" ]
+      }
+    }
+  }
+}
+EOF
+
+
+# 4. Iniciar el CloudWatch Agent
+
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+  -a fetch-config \
+  -m ec2 \
+  -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json \
+  -s
