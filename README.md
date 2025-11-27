@@ -69,19 +69,25 @@ Se activa el CloudWatch Agent, permitiendo visualizar:
 * Métricas por ASG e InstanceId
 
 Estructura del repositorio
-deploy/
-├── main.tf
-├── network.tf
-├── s3.tf
-├── rds.tf
-├── alb.tf
-├── autoscaling.tf
-├── bastion.tf
-├── variables.tf
-├── outputs.tf
-├── terraform.tfvars
-└── app_userdata.sh.tpl
-app/ → contenido de la aplicación (no incluido en este repo)
+```bash
+OBG-SolucionesCloud/
+├── README.md
+├── app/
+│   └── php-ecommerce-obligatorio-main/
+│       └── dump.sql
+└── deploy/
+    ├── alb.tf
+    ├── app_userdata.sh.tpl
+    ├── bastion_userdata.sh.tpl
+    ├── autoscaling.tf
+    ├── network.tf
+    ├── outputs.tf
+    ├── provider.tf
+    ├── rds.tf
+    ├── sg.tf
+    ├── terraform.tfvars
+    └── variables.tf
+```
 
 Se activa el CloudWatch Agent, permitiendo visualizar:
 * CPU
@@ -106,14 +112,14 @@ aws configure
 
 git clone https://github.com/eoriguela/OBG-SolucionesCloud.git
 
-cd ./deploy
+cd OBG-SolucionesCloud/deploy
 
-El folder /deploy contiene todos los archivos .tf necesarios.
+El folder /deploy contiene todos los archivos .tf necesarios para su despliegue.
 
 Pasos para Desplegar la Infraestructura Completa
 1. Clonar el repositorio
 git clone https://github.com/eoriguela/OBG-SolucionesCloud.git
-cd ./deploy
+cd OBG-SolucionesCloud/deploy
 2. Inicializar Terraform
 terraform init
 3. Validar la configuración
