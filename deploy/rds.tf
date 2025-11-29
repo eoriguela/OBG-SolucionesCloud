@@ -2,7 +2,7 @@
 #############################################
 
 resource "aws_db_subnet_group" "db_subnets" {
-  name       = "db-subnets"   # debe ser minúsculas + guion
+  name       = "db-subnets"
   subnet_ids = aws_subnet.private[*].id
 
   tags = {
@@ -11,7 +11,7 @@ resource "aws_db_subnet_group" "db_subnets" {
 }
 
 resource "aws_db_instance" "ecommerce" {
-  identifier              = "ecommerce-db"   # ← nombre válido para AWS
+  identifier              = "ecommerce-db"
   engine                  = "mysql"
   engine_version          = "5.7"
   instance_class          = var.db_instance_class

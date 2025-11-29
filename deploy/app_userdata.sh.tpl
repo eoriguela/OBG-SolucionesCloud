@@ -62,6 +62,7 @@ cat <<EOF > /var/www/html/config.php
 EOF
 
 
+##############################
 # Instalar CloudWatch Agent
 
 yum install -y amazon-cloudwatch-agent

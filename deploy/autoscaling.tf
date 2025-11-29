@@ -1,4 +1,5 @@
-#Envia la variable ${app_bucket} al script
+# Envia la variable ${app_bucket} al script
+
 data "template_file" "app_userdata" {
   template = file("${path.module}/app_userdata.sh.tpl")
 
@@ -23,7 +24,7 @@ resource "aws_launch_template" "app_lt" {
     security_groups = [aws_security_group.sg_app.id]
     associate_public_ip_address = true
   }
-
+  
   iam_instance_profile {
     name = "LabInstanceProfile"
   }
@@ -42,7 +43,7 @@ resource "aws_autoscaling_group" "asg_app" {
   min_size            = 1
 
   # SUBREDES PUBLICAS 
-
+  
   vpc_zone_identifier = aws_subnet.public[*].id
 
   launch_template {

@@ -22,3 +22,8 @@ output "nat_gateway_ids" {
   description = "IDs de NAT Gateways"
   value       = aws_nat_gateway.nat[*].id
 }
+
+output "alb_dns_name" {
+  description = "DNS público del Load Balancer"
+  value       = "http://${aws_lb.alb.dns_name}"
+}

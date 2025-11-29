@@ -25,4 +25,4 @@ db_username              = "ecommerce_user"
 db_password              = "Cambiar123!"
 db_instance_class        = "db.t3.micro"
 db_allocated_storage     = 20
-db_backup_retention_days = 7
+db_backup_retention_days = 30
