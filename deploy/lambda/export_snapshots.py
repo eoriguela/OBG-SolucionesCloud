@@ -1,29 +1,34 @@
 import boto3
-import datetime
+import os
+import json
+from datetime import datetime
 
-rds = boto3.client('rds')
-s3_bucket = "${var.vpc_name}-rds-snapshots"
+rds = boto3.client("rds")
+s3 = boto3.client("s3")
 
 def lambda_handler(event, context):
-    today = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+    db_identifier = os.environ["DB_IDENTIFIER"]
+    bucket = os.environ["BUCKET_NAME"]
 
+    # traer snapshots automáticos
     snapshots = rds.describe_db_snapshots(
-        DBInstanceIdentifier="ecommerce-db",
+        DBInstanceIdentifier=db_identifier,
         SnapshotType="automated"
     )["DBSnapshots"]
 
-    snapshots = sorted(snapshots, key=lambda x: x["SnapshotCreateTime"], reverse=True)
+    if not snapshots:
+        return {"msg": "No hay snapshots"}
 
-    latest = snapshots[0]["DBSnapshotIdentifier"]
+    # ordenar por fecha
+    snapshots.sort(key=lambda x: x["SnapshotCreateTime"], reverse=True)
+    latest = snapshots[0]
 
-    export_id = f"export-{latest}-{today}"
+    filename = f"backup-info-{datetime.utcnow().isoformat()}.json"
 
-    response = rds.start_export_task(
-        ExportTaskIdentifier=export_id,
-        SourceArn=f"arn:aws:rds:us-east-1:${account_id}:db:ecommerce-db",
-        S3BucketName=s3_bucket,
-        IamRoleArn=f"arn:aws:iam::{account_id}:role/LabInstanceProfile",
-        KmsKeyId="alias/aws/s3"
+    s3.put_object(
+        Bucket=bucket,
+        Key=filename,
+        Body=json.dumps(latest, default=str).encode("utf-8")
     )
 
-    return {"status": "OK", "export": export_id}
+    return {"msg": "Backup guardado", "file": filename}
