@@ -1,19 +1,19 @@
 #!/bin/bash
 
-yum update -y
-yum install -y mysql awscli
+yum update -y                     # Actualizamos todos los paquetes del sistema
+yum install -y mysql awscli       # Instalamos el cliente MySQL y AWS CLI para realizar descargas desde S3
 
-# Descargar dump.sql desde S3 usando IAM Role
+# Descargamos el archivo dump.sql desde el bucket S3 utilizando el rol IAM asignado a la instancia
 aws s3 cp s3://${s3_bucket}/dump.sql /tmp/dump.sql
 
-# Esperar a que el RDS esté accesible
+# Realizamos una espera activa para verificar que el RDS se encuentre accesible antes de iniciar la importación
 for i in {1..30}; do
-    mysql -h ${db_endpoint} -u ${db_username} -p${db_password} -e "SHOW DATABASES;" && break
-    echo "Esperando RDS..."
-    sleep 10
+    mysql -h ${db_endpoint} -u ${db_username} -p${db_password} -e "SHOW DATABASES;" && break   # Validamos conectividad
+    echo "Esperando RDS..."                                                                     # Indicamos estado de espera
+    sleep 10                                                                                    # Retrasamos 10 segundos entre intentos
 done
 
-# Importar dump
+# Importamos el dump descargado hacia la base de datos definida
 mysql -h ${db_endpoint} -u ${db_username} -p${db_password} ${db_name} < /tmp/dump.sql
 
-echo "Importación completada"
+echo "Importación completada"        # Confirmamos finalización del proceso

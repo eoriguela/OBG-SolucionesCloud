@@ -1,197 +1,199 @@
 # Security Groups y NACL
-# Un SG por resource para mayor control
+# Un SG por recurso para brindar un mayor nivel de control
 #############################################
 
-#Load Balancer Security Group
-
+# Security Group del Load Balancer público
 resource "aws_security_group" "sg_lb" {
-  name        = "${var.vpc_name}-lb-sg"
-  description = "Security Group del Load Balancer publico"
-  vpc_id      = aws_vpc.main.id
+  name        = "${var.vpc_name}-lb-sg"                       # Nombre del SG basado en la VPC
+  description = "Security Group del Load Balancer publico"    # Descripción del SG
+  vpc_id      = aws_vpc.main.id                               # Asociado a la VPC principal
 
-  # HTTP publico
+  # Regla de entrada HTTP desde cualquier origen
   ingress {
-    description = "HTTP publico"
-    from_port   = 80
+    description = "HTTP publico"                              # Permite tráfico HTTP
+    from_port   = 80                                          # Puerto 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]                               # Acceso abierto
   }
 
-  # HTTPS publico (para conexiones SSL)
+  # Regla de entrada HTTPS desde cualquier origen
   ingress {
-    description = "HTTPS publico"
-    from_port   = 443
+    description = "HTTPS publico"                             # Permite tráfico HTTPS
+    from_port   = 443                                         # Puerto 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]                               # Acceso abierto
   }
 
-  # Salida hacia App Servers
+  # Regla de salida hacia cualquier destino (uso habitual en ALB)
   egress {
-    from_port   = 0
+    from_port   = 0                                           # Todo tráfico
     to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    protocol    = "-1"                                        # Cualquier protocolo
+    cidr_blocks = ["0.0.0.0/0"]                               # Libre salida
   }
 
   tags = {
-    Name = "${var.vpc_name}-lb-sg"
+    Name = "${var.vpc_name}-lb-sg"                            # Etiqueta
   }
 }
 
-
-
-#App Server Security Group
-
+# Security Group para los servidores de aplicación
 resource "aws_security_group" "sg_app" {
-  name        = "${var.vpc_name}-app-sg"
-  description = "Security Group de servidores de aplicacion"
-  vpc_id      = aws_vpc.main.id
+  name        = "${var.vpc_name}-app-sg"                      # Nombre del SG
+  description = "Security Group de servidores de aplicacion"  # Descripción del SG
+  vpc_id      = aws_vpc.main.id                               # Asociado a la VPC
 
-  # Trafico HTTP desde el ALB
-  # Los App Servers solo aceptan tráfico del LB
+  # Entrada HTTP permitida solo desde el Load Balancer
   ingress {
-    description     = "Trafico HTTP desde ALB"
-    from_port       = 80
+    description     = "Trafico HTTP desde ALB"               # Tráfico controlado desde ALB
+    from_port       = 80                                     # Puerto 80
     to_port         = 80
     protocol        = "tcp"
-    security_groups = [aws_security_group.sg_lb.id]
+    security_groups = [aws_security_group.sg_lb.id]          # Origen limitado al SG del LB
   }
 
-  # SSH permitido desde cualquier IP o rango autorizado
+  # Entrada SSH con fines administrativos de laboratorio
   ingress {
-    description = "SSH administrativo"
-    from_port   = 22
+    description = "SSH administrativo"                       # Acceso administrativo
+    from_port   = 22                                         # Puerto 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] #Se permiten conexiones desde cualquier lugar con fines de laboratorio
+    cidr_blocks = ["0.0.0.0/0"]                               # Abierto al mundo (solo laboratorio)
   }
 
-  # Salida a todas las subredes privadas (DB y Backups)
+  # Salida general hacia toda la VPC o Internet
   egress {
-    description = "Salida hacia toda la VPC"
-    from_port   = 0
+    description = "Salida hacia toda la VPC"                 # Permite instalación de paquetes
+    from_port   = 0                                          # Todos los puertos
     to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"] #Se permite salida general para poder instalar desde internet
+    protocol    = "-1"                                       # Cualquier protocolo
+    cidr_blocks = ["0.0.0.0/0"]                              # Salida libre
   }
 
   tags = {
-    Name = "${var.vpc_name}-app-sg"
+    Name = "${var.vpc_name}-app-sg"                          # Etiqueta
   }
 }
 
-# DB Security Group
-# SG de Base de datos (MySql RDS MULTI-AZ)
+#############################################
+# Security Group para la Base de Datos MySQL (RDS)
 #############################################
 
 resource "aws_security_group" "sg_db" {
-  name        = "${var.vpc_name}-db-sg"
-  description = "Security Group de RDS MySQL"
-  vpc_id      = aws_vpc.main.id
+  name        = "${var.vpc_name}-db-sg"                       # Nombre del SG
+  description = "Security Group de RDS MySQL"                 # Descripción
+  vpc_id      = aws_vpc.main.id                               # VPC asociada
 
-  # MySQL permitido desde servidores de aplicación
+  # Permite acceso MySQL desde los servidores de aplicación
   ingress {
-    description     = "MySQL desde instancias de aplicacion"
+    description     = "MySQL desde instancias de aplicacion" # Acceso a puerto 3306
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.sg_app.id]
+    security_groups = [aws_security_group.sg_app.id]          # Solo desde SG de aplicación
   }
 
-  # Permitir trafico del servidor de backups
+  # Acceso MySQL desde el servidor de backups
   ingress {
-    description     = "MySQL desde servidor de Backups"
+    description     = "MySQL desde servidor de Backups"       # Permite al servidor de backups conectarse
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.sg_backup.id]
+    security_groups = [aws_security_group.sg_backup.id]       # Solo desde SG de backup
   }
 
-  # MySQL desde Bastion
+  # Acceso MySQL desde el Bastion Host
   ingress {
-    description     = "MySQL desde Bastion"
+    description     = "MySQL desde Bastion"                   # Acceso desde bastion
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.sg_bastion.id]
+    security_groups = [aws_security_group.sg_bastion.id]      # Origen: SG de bastion
   }
 
-  # Salida general (normal en RDS)
+  # Salida general (normal en RDS gestionado por AWS)
   egress {
-    from_port   = 0
+    from_port   = 0                                           # Todo tráfico
     to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    protocol    = "-1"                                        # Cualquier protocolo
+    cidr_blocks = ["0.0.0.0/0"]                               # Salida libre
   }
 
   tags = {
-    Name = "${var.vpc_name}-db-sg"
+    Name = "${var.vpc_name}-db-sg"                            # Etiqueta
   }
 }
 
-# Backup Server Security Group
+#############################################
+# Security Group del Servidor de Backups
+#############################################
+
 resource "aws_security_group" "sg_backup" {
-  name        = "${var.vpc_name}-backup-sg"
-  description = "Security Group para servidor de backups"
-  vpc_id      = aws_vpc.main.id
+  name        = "${var.vpc_name}-backup-sg"                   # Nombre del SG
+  description = "Security Group para servidor de backups"     # Descripción
+  vpc_id      = aws_vpc.main.id                               # VPC asociada
 
-  # Permitir conexiones desde App Servers (para subir backups)
+  # Permitir acceso SSH desde App Servers (para subir archivos)
   ingress {
-    description     = "Backups desde App Servers"
-    from_port       = 22
-    to_port         = 22
-    protocol        = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Permitir salida hacia RDS
-  egress {
-    description = "Salida hacia RDS"
-    from_port   = 3306
-    to_port     = 3306
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Salida general (si se requiere para servicios S3 o LB)
-  egress {
-    description = "Salida general"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  tags = {
-    Name = "${var.vpc_name}-backup-sg"
-  }
-}
-
-# Bastion Security Group
-resource "aws_security_group" "sg_bastion" {
-  name        = "${var.vpc_name}-bastion-sg"
-  description = "Security Group para bastion host"
-  vpc_id      = aws_vpc.main.id
-
-  # SSH desde Internet (solo laboratorio)
-  ingress {
-    description = "SSH"
+    description = "Backups desde App Servers"                 # Tráfico entrante SSH
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]                               # Abierto por fines de laboratorio
   }
 
-  # Salida a Internet (y también a la VPC)
+  # Permitir salida hacia RDS MySQL
   egress {
+    description = "Salida hacia RDS"                          # Conexión a MySQL
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]                               # Salida abierta
+  }
+
+  # Salida general para acceso a S3 u otros servicios
+  egress {
+    description = "Salida general"                            # Permite uso de AWS CLI, S3, etc.
     from_port   = 0
     to_port     = 0
-    protocol    = "-1"
+    protocol    = "-1"                                        # Todos los protocolos
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
-    Name = "${var.vpc_name}-bastion-sg"
+    Name = "${var.vpc_name}-backup-sg"                        # Etiqueta
+  }
+}
+
+#############################################
+# Security Group para Bastion Host
+#############################################
+
+resource "aws_security_group" "sg_bastion" {
+  name        = "${var.vpc_name}-bastion-sg"                  # Nombre del SG
+  description = "Security Group para bastion host"            # Descripción
+  vpc_id      = aws_vpc.main.id                               # VPC asociada
+
+  # Entrada SSH desde Internet (solo entorno de laboratorio)
+  ingress {
+    description = "SSH"                                       # Acceso administrativo
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]                               # Abierto completamente
+  }
+
+  # Salida general hacia Internet y subredes privadas
+  egress {
+    from_port   = 0                                           # Todo tráfico
+    to_port     = 0
+    protocol    = "-1"                                        # Cualquier protocolo
+    cidr_blocks = ["0.0.0.0/0"]                               # Sin restricciones
+  }
+
+  tags = {
+    Name = "${var.vpc_name}-bastion-sg"                       # Etiqueta
   }
 }
