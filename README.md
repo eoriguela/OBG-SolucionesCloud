@@ -73,17 +73,24 @@ Estructura del repositorio
 OBG-SolucionesCloud/
 ├── README.md
 ├── app/
-│   └── php-ecommerce-obligatorio-main/
-│       └── dump.sql
+│   └── php-ecommerce-obligatorio-2025/
+│       ├── dump.sql
+│       └── "Resto de archivos de la app..."
 └── deploy/
     ├── alb.tf
     ├── app_userdata.sh.tpl
-    ├── bastion_userdata.sh.tpl
     ├── autoscaling.tf
+    ├── backup.tf
+    ├── backup_userdata.sh.tpl
+    ├── bastion.tf
+    ├── bastion_userdata.sh.tpl
     ├── network.tf
     ├── outputs.tf
     ├── provider.tf
     ├── rds.tf
+    ├── s3.tf
+    ├── scripts/
+    │   └── mysql-backup.sh
     ├── sg.tf
     ├── terraform.tfvars
     └── variables.tf
