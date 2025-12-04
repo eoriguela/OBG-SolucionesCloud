@@ -31,6 +31,7 @@ La infraestructura se crea automáticamente mediante la utilizacion de Terraform
 4. S3
 
 * Bucket para almacenar el dump de la base de datos
+* Bucket para almacenar dump diarios de la base de datos
 * Bucket para hostear el despliegue de la aplicación
 
 5. Auto Scaling Group
@@ -72,6 +73,7 @@ Estructura del repositorio
 ```bash
 OBG-SolucionesCloud/
 ├── README.md
+├── Diseño.jpg
 ├── app/
 │   └── php-ecommerce-obligatorio-2025/
 │       ├── dump.sql
@@ -125,8 +127,8 @@ El folder /deploy contiene todos los archivos .tf necesarios para su despliegue.
 
 Pasos para Desplegar la Infraestructura Completa
 1. Clonar el repositorio
-git clone https://github.com/eoriguela/OBG-SolucionesCloud.git
-cd OBG-SolucionesCloud/deploy
+* git clone https://github.com/eoriguela/OBG-SolucionesCloud.git
+* cd OBG-SolucionesCloud/deploy
 2. Inicializar Terraform
 terraform init
 3. Validar la configuración
@@ -136,6 +138,18 @@ terraform plan
 5. Aplicar cambios
 terraform apply
 
+Al finalizar, Terraform mostrará como output el endpoint del ALB, por ejemplo:
+* http://obligatorio-vpc-alb-1234567890.us-east-1.elb.amazonaws.com
+
+Resultado final
+
+* La ejecución de Terraform despliega automáticamente:
+* Infraestructura completa tolerante a fallos
+* Aplicación PHP funcionando vía ALB
+* Base RDS cargada y accesible
+* Autoscaling funcionando
+* Sistema automático de respaldos diarios a S3
+* Monitoreo activo con CloudWatch
 
 Autores
 Infraestructura desarrollada por Santiago Silva y Ezequiel Origuela, en conjunto con el soporte de Terraform y AWS.
